@@ -1,6 +1,12 @@
 package stringWeights;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class WeightedStrings {
+
+	private final int stringWeight;
+	List<String> myStrings = new ArrayList<String>();
 
 	/**
 	 * Create a WeightedStrings object that will hold Strings of the specified
@@ -13,7 +19,10 @@ public class WeightedStrings {
 	 */
 	public WeightedStrings(int weight) throws IllegalArgumentException {
 		// TODO: implement this method
-		;
+		if((weight <0) || (weight >= 1013))
+			throw new IllegalArgumentException("Weight is either less than 0 or greater than or equal to 1013");
+		stringWeight = weight;
+
 	}
 
 	/**
@@ -29,7 +38,25 @@ public class WeightedStrings {
 	 */
 	public WeightedStrings(String[] strArray) throws IllegalArgumentException {
 		// TODO: implement this method
-		;
+		if(strArray.length == 0)
+			throw new IllegalArgumentException("The string array has length 0");
+
+		int lengthOfArray = strArray.length;
+		int strArrayWeight = getStringWeight(strArray[0]);
+		stringWeight = strArrayWeight;
+
+		for(int count = 0; count < lengthOfArray; count++) {
+			if(getStringWeight(strArray[count]) != strArrayWeight)
+					throw new IllegalArgumentException("Element " + count + "has a different weight compared to other strings in this array");
+			myStrings.add(strArray[count]);
+		}
+
+/*		if(myStrings.size() == 0) {
+			stringWeight = 0;
+		} else {
+			stringWeight = getStringWeight(myStrings.get(0));
+		}
+*/
 	}
 
 	/**
@@ -47,7 +74,17 @@ public class WeightedStrings {
 	public static int getStringWeight(String str) {
 
 		// TODO: implement this method
+		int weight = 0;
 
+		for(int count = 0; count < (str.length()); count++) {
+			Character currentChar = str.charAt(count);
+			int asciiValue = (int) currentChar;
+
+			if(((65 <= asciiValue) && (asciiValue <= 90)) || ((97 <= asciiValue) && (asciiValue <= 122))) {
+				weight = (weight + (count + 1)*asciiValue) % 1013;
+			}
+		}
+		return weight;
 	}
 
 	/**
@@ -65,7 +102,22 @@ public class WeightedStrings {
 	 */
 	public boolean add(String str) {
 		// TODO: Implement this method
-		return false;
+		boolean exists = false;
+		for(int count = 0; count < myStrings.size(); count++) {
+			if(str.contentEquals(myStrings.get(count)))
+				exists = true;
+		}
+
+		if(exists)
+			return false;
+		else if(getStringWeight(str) != stringWeight)
+			return false;
+		else if(str == null)
+			return false;
+		else
+			myStrings.add(str);
+
+		return true;
 	}
 
 	/**
@@ -76,14 +128,39 @@ public class WeightedStrings {
 	@Override
 	public boolean equals(Object other) {
 		// TODO: Implement this method
-		return true;
+		if(other instanceof  WeightedStrings) {
+			if(this.myStrings.size() != ( ((WeightedStrings) other).myStrings.size())) { //i.e. if they've got different number of strings in them
+				return false;
+			}
+			else {
+				//Check to see if each and every word in one list appears in the other
+				boolean matched = false;
+				for(int count = 0; count < this.myStrings.size(); count++) {
+					matched = false;
+					for (int insideCount = 0; insideCount < this.myStrings.size(); insideCount++) {
+						if(this.myStrings.get(count).contentEquals(((WeightedStrings)other).myStrings.get(insideCount) )) {
+							matched = true;
+							break;
+						}
+					}
+					if(!matched)
+						break;
+				}
+				return matched;
+			}
+		}
+		else return false;
 	}
 
 	@Override
 	public int hashCode() {
 		// TODO: Implement this method
 		// Follow the usual rules for hashCode
-		return (int) (100 * Math.random());
+		int hashCode = 0;
+		for(int count = 0; count < myStrings.size(); count++) {
+			hashCode += myStrings.get(count).hashCode();
+		}
+		return hashCode;
 	}
 
 	/**
@@ -98,7 +175,8 @@ public class WeightedStrings {
 	 */
 	public boolean equivalent(WeightedStrings other) {
 		// TODO: Implement this method
-		return true;
+
+		return (this.stringWeight == other.stringWeight);
 	}
 
 }
